@@ -1,41 +1,47 @@
 #!/bin/bash
-#
-# Check that the health endpoint is returning 200
 
-echo "Starting Go application..."
+# Script to test the health endpoint of the Todo API
+# Location: .CSSE6400/bin/health.sh
 
-# Build and start Go app in the background with PORT environment variable
-go build -o app
-PORT=6400 ./app &
-pid=$!
+# Set text colors
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
 
-# Check for errors in the build/start process
-if [[ $? -ne 0 ]]; then
-    echo "Failed to build or start Go application"
-    exit 1
-fi
+# Create test results directory if it doesn't exist
+mkdir -p test-results
 
-echo "Go application started with PID: $pid"
+echo -e "${YELLOW}Testing API Health Endpoint...${NC}"
 
-# Wait for the application to initialize
-echo "Waiting for application to start..."
+# Start the container
+echo -e "${YELLOW}Starting container...${NC}"
+docker run -d -p 6400:6400 --name todo-api-test todo-api:test
+
+# Wait for the API to start
+echo -e "${YELLOW}Waiting for API to start...${NC}"
 sleep 5
 
-# Check that the health endpoint is returning 200
-echo "Testing health endpoint..."
-response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:6400/api/v1/health)
-if [[ $response -ne 200 ]]; then
-    echo "Failed to get 200 from health endpoint (got $response)"
-    # Kill Go app before exiting
-    kill $pid
-    exit 1
+# Test the health endpoint
+echo -e "${YELLOW}Testing /api/health endpoint...${NC}"
+HEALTH_RESPONSE=$(curl -s -w "\n%{http_code}" http://localhost:6400/api/health)
+HTTP_BODY=$(echo "$HEALTH_RESPONSE" | head -n 1)
+HTTP_CODE=$(echo "$HEALTH_RESPONSE" | tail -n 1)
+
+# Output result
+echo -e "${YELLOW}Health endpoint response: $HTTP_BODY${NC}"
+echo -e "${YELLOW}HTTP status code: $HTTP_CODE${NC}"
+
+# Check if the test passed
+if [[ "$HTTP_BODY" == *"ok"* ]] && [[ "$HTTP_CODE" == "200" ]]; then
+  echo -e "${GREEN}✓ Health endpoint test passed!${NC}"
+  echo "PASS" > test-results/health.txt
+  exit 0
+else
+  echo -e "${RED}✗ Health endpoint test failed!${NC}"
+  echo -e "${RED}Expected response containing 'ok' with status code 200${NC}"
+  echo "FAIL" > test-results/health.txt
+  
+  # Don't stop the container yet, other tests will use it
+  exit 1
 fi
-
-echo "Health endpoint responded with 200 OK"
-
-# Kill Go app
-echo "Stopping Go application..."
-kill $pid
-
-echo "Test passed successfully"
-exit 0
