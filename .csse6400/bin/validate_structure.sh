@@ -1,35 +1,36 @@
 #!/bin/bash
 #
-# Validate that the repository has the following structure:
-# -- README.md
-# -- pyproject.toml
-# -- todo
-#    | -- __init__.py
-#    | -- views
-#         | -- routes.py
+# Validate the structure of the Go repository
 
-failed=0
-for file in README.md pyproject.toml; do
-    if [ ! -f "$file" ]; then
-        echo "FAIL: Missing $file"
-        failed=1
+# Flag to track if any errors were found
+errors=0
+
+# Check for required Go files and directories
+check_file() {
+    if [ ! -f "$1" ] && [ ! -d "$1" ]; then
+        echo "FAIL: Missing $1"
+        errors=1
     fi
-done
+}
 
-if [ ! -d todo ]; then
-    echo "FAIL: Missing todo directory"
-    failed=1
-fi
+# Check for Go module files
+check_file "go.mod"
+check_file "go.sum"
 
-for file in todo/__init__.py todo/views/routes.py; do
-    if [ ! -f "$file" ]; then
-        echo "FAIL: Missing $file"
-        failed=1
-    fi
-done
+# Check for main.go
+check_file "main.go"
 
-if [ $failed -eq 1 ]; then
+# Check for handlers directory
+check_file "handlers"
+
+# Check for model directory
+check_file "model"
+
+# Return success or failure
+if [ $errors -eq 0 ]; then
+    echo "Repository structure is valid."
+    exit 0
+else
     echo "Repository structure is not valid. Please fix the errors above."
     exit 1
 fi
-

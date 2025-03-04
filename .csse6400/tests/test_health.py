@@ -1,14 +1,14 @@
 import unittest
-from todo import create_app
+import requests
 
 class TestHealth(unittest.TestCase):
     def setUp(self):
-        self.client = create_app().test_client()
+        self.api_url = "http://localhost:6400"
 
     def test_health(self):
-        response = self.client.get('/api/v1/health')
+        response = requests.get(f"{self.api_url}/api/v1/health")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json, {'status': 'ok'})
+        self.assertEqual(response.json(), {'status': 'ok'})
 
 if __name__ == '__main__':
     unittest.main()
