@@ -6,10 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"todo/handlers"
+	"todo/model"
 )
 
 func main() {
 	r := gin.Default()
+
+	todoRepo := model.NewStaticTodoRepository()
+
+	todoHandler := handlers.NewHandlerFunc(todoRepo)
 
 	v1 := r.Group("/api/v1")
 	{
@@ -18,10 +23,12 @@ func main() {
 				"status": "ok",
 			})
 		})
-
-		todo := v1.Group("/todos")
+		todos := v1.Group("todos")
 		{
-			todo.GET("", handlers.TodoHandler())
+			todos.GET("/", todoHandler.GetTodo())
+			todos.GET("/:id", todoHandler.GetTodoByID())
+			todos.POST("/", todoHandler.PostTodo())
+			todos.PUT("/:id", todoHandler.PutTodo())
 		}
 
 	}
