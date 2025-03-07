@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +13,10 @@ import (
 func main() {
 	r := gin.Default()
 
-	todoRepo := model.NewStaticTodoRepository()
+	todoRepo, err := model.NewMongoTodoReposity()
+	if err != nil {
+		log.Fatalf("Model had a fatal error %d", err)
+	}
 
 	todoHandler := handlers.NewHandlerFunc(todoRepo)
 
@@ -25,9 +29,9 @@ func main() {
 		})
 		todos := v1.Group("todos")
 		{
-			todos.GET("/", todoHandler.GetTodo())
+			todos.GET("", todoHandler.GetTodo())
 			todos.GET("/:id", todoHandler.GetTodoByID())
-			todos.POST("/", todoHandler.PostTodo())
+			todos.POST("", todoHandler.PostTodo())
 			todos.PUT("/:id", todoHandler.PutTodo())
 		}
 

@@ -24,7 +24,7 @@ func (h *Handler) GetTodo() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req types.GetoTodosReq
 
-		if err := ctx.ShouldBind(&req); err != nil {
+		if err := ctx.ShouldBindQuery(&req); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
