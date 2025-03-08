@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"todo/types"
@@ -117,9 +118,63 @@ func (r *MongoTodoReposity) Create(postReq types.PostTodoReq) (types.Todo, error
 }
 
 func (r *MongoTodoReposity) Update(id int, updates types.PutTodoReq) (types.Todo, error) {
-	return types.Todo{}, nil
+	collection := r.client.Database("todoDB").Collection("todos")
+	updateDoc := bson.M{}
+
+	if updates.Title != nil {
+		updateDoc["title"] = *updates.Title
+	}
+
+	if updates.Description != nil {
+		updateDoc["description"] = *updates.Description
+	}
+
+	if updates.Completed != nil {
+		updateDoc["completed"] = *updates.Completed
+	}
+
+	if updates.DeadlineAt != nil {
+		updateDoc["deadlint_at"] = *updates.DeadlineAt
+	}
+
+	update := bson.M{"$set": updateDoc}
+
+	opts := options.FindOneAndUpdate().SetReturnDocument(options.After)
+
+	var updatedTodo types.Todo
+	err := collection.FindOneAndUpdate(
+		context.Background(),
+		bson.M{"_id": id},
+		update,
+		opts,
+	).Decode(&updatedTodo)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return types.Todo{}, fmt.Errorf("todo with id %d not found", id)
+		}
+		return types.Todo{}, err
+	}
+
+	return updatedTodo, nil
 }
 
 func (r *MongoTodoReposity) Delete(id int) (types.Todo, error) {
-	return types.Todo{}, nil
+	collection := r.client.Database("todoDB").Collection("todos")
+	ctx := context.Background()
+	filter := bson.M{"_id": id}
+
+	var deletedTodo types.Todo
+	result := collection.FindOneAndDelete(ctx, filter)
+	if err := result.Err(); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return types.Todo{}, err
+		}
+		return types.Todo{}, err
+	}
+
+	if err := result.Decode(&deletedTodo); err != nil {
+		return types.Todo{}, err
+	}
+
+	return deletedTodo, nil
 }
