@@ -1,23 +1,21 @@
 name: Go API Tests with MongoDB
-
 on:
   push:
     branches: [ main, master, develop ]
   pull_request:
     branches: [ main, master, develop ]
   workflow_dispatch:  # Allows manual triggering
-
 jobs:
   test:
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       # Install Docker
       - name: Install Docker
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           install: true
       
@@ -49,7 +47,7 @@ jobs:
       # Upload logs as artifacts
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-logs
           path: ./test-logs/
