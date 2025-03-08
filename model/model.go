@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"todo/types"
@@ -22,20 +23,24 @@ type TodoRepository interface {
 
 var _ TodoRepository = (*MongoTodoReposity)(nil)
 
-type StaticTodoRepository struct {
-	todos []types.Todo
-}
-
 type MongoTodoReposity struct {
 	client *mongo.Client
 }
 
 func NewMongoTodoReposity() (*MongoTodoReposity, error) {
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017"))
+	// Get MongoDB URI from environment variable, with fallback to localhost
+	mongoURI := os.Getenv("MONGO_URI")
+	if mongoURI == "" {
+		mongoURI = "mongodb://localhost:27017"
+	}
+
+	// Connect to MongoDB using the URI from environment
+	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(mongoURI))
 	if err != nil {
 		return nil, err
 	}
 
+	// Validate connection with ping
 	err = client.Ping(context.Background(), nil)
 	if err != nil {
 		return nil, err

@@ -36,5 +36,5 @@ func main() {
 		}
 
 	}
-	r.Run(":6400") // Specify port 6400 here
+	r.Run() // Specify port 6400 here
 }

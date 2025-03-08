@@ -23,10 +23,10 @@ WORKDIR /app
 COPY --from=build /app/app .
 
 # Set environment variables
-ENV PORT=6400
+ENV PORT=8080
 
 # Expose the port
-EXPOSE 6400
+EXPOSE 8080
 
 # Run the application
 CMD ["./app"]
