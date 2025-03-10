@@ -77,9 +77,6 @@ func (r *MongoTodoReposity) GetByID(id int) (types.Todo, error) {
 	var todo types.Todo
 	err := collection.FindOne(ctx, filter).Decode(&todo)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return types.Todo{}, err
-		}
 		return types.Todo{}, err
 	}
 

@@ -8,9 +8,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    volumes:
-      - mongodb_data:/data/db  
-    
+
   api:
     build: .
     depends_on:
@@ -21,23 +19,14 @@ services:
       - GIN_MODE=test
     ports:
       - "8080:8080"
-    command: ["./app"]
-    volumes:
-      - api_logs:/app/logs  
+    command: ["./app"] 
 
   test:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile  
     depends_on:
       api:
         condition: service_started
     environment:
       - API_URL=http://api:8080
-
-
-volumes:
-  mongodb_data:  
-  api_logs:      
-
-
