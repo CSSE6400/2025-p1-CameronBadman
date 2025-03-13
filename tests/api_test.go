@@ -17,4 +17,7 @@ func TestHealth(t *testing.T) {
 func TestTodoEndpoint(t *testing.T) {
 	// Placeholder for actual API tests
 	assert.True(t, true, "Todo endpoint test placeholder")
+	// req, err := http.NewRequest("Post", "localhost:8080/api/v1", body io.Reader)
 }
+
+// https://resty.dev/

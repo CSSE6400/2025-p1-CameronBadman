@@ -5,8 +5,8 @@ import (
 )
 
 type GetoTodosReq struct {
-	Completed *bool `form:"completed" binding:"required"`
-	Window    *int  `form:"window" binding:"required,gte=0"`
+	Completed *bool `form:"completed" binding:"omitempty"`
+	Window    *int  `form:"window" binding:"omitempty,gte=0"`
 }
 
 type Todo struct {
